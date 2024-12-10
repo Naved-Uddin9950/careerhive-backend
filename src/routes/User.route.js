@@ -1,10 +1,9 @@
 import express from 'express';
-import { sendOtp, verifyOtp, setupProfile } from '../controllers/User.controller.js';
+import { login, register } from '../controllers/User.controller.js';
 
 const router = express.Router();
 
-router.post('/register', sendOtp);
-router.get('/verify-otp', verifyOtp);
-router.post('/setup-profile', setupProfile);
+router.post('/register', register);
+router.post('/login', login);
 
 export default router;

@@ -1,117 +1,71 @@
 import User from '../models/User.model.js';
-import sendOtpEmail from '../utils/emailService.js';
 import bcrypt from 'bcryptjs';
-import { nanoid } from 'nanoid';
+import jwt from 'jsonwebtoken';
 
-export const sendOtp = async (req, res) => {
-    const { fullName, email, password, role } = req.body;
-    const { retry } = req.query;
+const JWT_SECRET = process.env.JWT_SECRET || 'test123';
+const JWT_EXPIRES_IN = '24h';
+
+export const register = async (req, res) => {
+    const { fullname, email, password, role } = req.body;
 
     try {
         const existingUser = await User.findOne({ email });
 
         if (existingUser) {
-            if (!retry) {
-                return res.status(400).json({ message: 'Email already registered' });
-            }
-
-            // const otp = nanoid(6);
-            // existingUser.otp = otp;
-            // existingUser.otpExpiration = Date.now() + 15 * 60 * 1000;
-
-            await existingUser.save();
-            // await sendOtpEmail(email, otp);
-
-            return res.status(200).json({ message: 'OTP resent to email' });
+            return res.status(400).json({ message: 'Email already registered' });
         }
 
-        // const otp = nanoid(6);
-        // const otpExpiration = Date.now() + 15 * 60 * 1000;
-
+        const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = new User({
-            fullName,
+            fullname,
             email,
-            password,
+            password: hashedPassword,
             role
-            // otp,
-            // otpExpiration,
         });
 
-        // await sendOtpEmail(email, otp);
         await newUser.save();
 
         res.status(200).json({ message: 'Registeration succsessful' });
     } catch (err) {
-        console.error('Error in sending OTP:', err);
+        console.error('Error registering user:', err);
         res.status(500).json({ message: 'Server error' });
     }
 };
 
-export const verifyOtp = async (req, res) => {
-    const { email, otp } = req.query;
+export const login = async (req, res) => {
+    const { email, password } = req.body;
 
     try {
         const user = await User.findOne({ email });
 
         if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+            return res.status(401).json({ message: "User doesn't exists" });
         }
 
-        if (user.otp !== otp) {
-            return res.status(400).json({ message: 'Invalid OTP' });
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+
+        if (!isPasswordValid) {
+            return res.status(401).json({ message: 'Invalid email or password' });
         }
 
-        if (user.otpExpiration < Date.now()) {
-            return res.status(400).json({ message: 'OTP expired' });
-        }
+        const token = jwt.sign(
+            { userId: user._id, role: user.role },
+            JWT_SECRET,
+            { expiresIn: JWT_EXPIRES_IN }
+        );
 
-        user.isVerified = false;
-        await user.save();
-
-        res.status(200).json({ message: 'OTP verified successfully' });
+        res.status(200).json({
+            message: 'Login successful',
+            token,
+            user: {
+                id: user._id,
+                fullname: user.fullname,
+                email: user.email,
+                role: user.role,
+            },
+        });
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Server error' });
-    }
-};
-
-export const setupProfile = async (req, res) => {
-    const { email, firstName, country, password, confirmPassword } = req.body;
-
-    try {
-        const user = await User.findOne({ email });
-
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-
-        if (user.isVerified) {
-            return res.status(400).json({ message: 'User is already verified' });
-        }
-
-        if (password !== confirmPassword) {
-            return res.status(400).json({ message: 'Passwords do not match' });
-        }
-
-        const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[a-z]).{8,}$/;
-        if (!passwordRegex.test(password)) {
-            return res.status(400).json({
-                message:
-                    'Password must be at least 8 characters long, contain an uppercase letter, a lowercase letter, and a number.',
-            });
-        }
-
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        user.firstName = firstName;
-        user.country = country;
-        user.password = hashedPassword;
-        user.isVerified = true;
-        await user.save();
-
-        res.status(200).json({ message: 'Profile setup successful, user registered!' });
-    } catch (err) {
-        console.error(err);
+        console.error('Error during login:', err);
         res.status(500).json({ message: 'Server error' });
     }
 };

@@ -14,14 +14,6 @@ const userSchema = new mongoose.Schema(
             default: null,
             match: [/^\S+@\S+\.\S+$/, 'Please provide a valid email address'],
         },
-        otp: {
-            type: String,
-            default: null,
-        },
-        otpExpiration: {
-            type: Date,
-            default: null,
-        },
         password: {
             type: String,
             default: null,
