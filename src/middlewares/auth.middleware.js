@@ -1,3 +1,5 @@
+import jwt from 'jsonwebtoken';
+
 const JWT_SECRET = process.env.JWT_SECRET || 'test123';
 const JWT_EXPIRES_IN = '24h';
 
@@ -15,6 +17,7 @@ export const verifyToken = (req, res, next) => {
         req.user = decoded;
         next();
     } catch (err) {
+        console.log(err)
         return res.status(403).json({ message: 'Invalid or expired token' });
     }
 };
