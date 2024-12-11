@@ -21,7 +21,10 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [];
 //     methods: ['GET', 'POST', 'PUT', 'DELETE'],
 // }));
 
-app.use(cors());
+app.use(cors({
+    origin: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+}));
 
 mongoose
     .connect(DB_CONNECTION_STRING)
