@@ -27,7 +27,7 @@ app.use(cors({
 }));
 
 mongoose
-    .connect("mongodb + srv://shinigami:naveduddin2003@cluster1.qqdn7pi.mongodb.net/careerhive?retryWrites=true&w=majority&appName=Cluster1")
+    .connect("mongodb+srv://shinigami:naveduddin2003@cluster1.qqdn7pi.mongodb.net/careerhive?retryWrites=true&w=majority&appName=Cluster1")
     // .connect(DB_CONNECTION_STRING)
     .then(() => console.log('Database connected.'))
     .catch((err) => console.log('Error connecting to Database:', err));
