@@ -31,6 +31,21 @@ const jobPostSchema = new mongoose.Schema({
             message: 'Maximum salary must be greater than or equal to minimum salary',
         },
     },
+    location: {
+        type: String,
+        required: true,
+        trim: true,
+    },
+    skills: {
+        type: [String],
+        required: true,
+        validate: {
+            validator: function (value) {
+                return value.length > 0;
+            },
+            message: 'At least one skill must be provided',
+        },
+    },
     createdBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',

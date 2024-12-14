@@ -2,14 +2,15 @@ import JobPost from '../models/JobPost.model.js';
 
 export const createPost = async (req, res) => {
     try {
-        const { title, description, type, salaryMin, salaryMax } = req.body;
-        console.log()
+        const { title, description, type, salaryMin, salaryMax, location, skills } = req.body;
         const jobPost = new JobPost({
             title,
             description,
             type,
             salaryMin,
             salaryMax,
+            location,
+            skills,
             createdBy: req.user.userId,
         });
 
@@ -55,13 +56,15 @@ export const updatePost = async (req, res) => {
             return res.status(403).json({ success: false, message: 'Unauthorized to edit this job post' });
         }
 
-        const { title, description, type, salaryMin, salaryMax } = req.body;
+        const { title, description, type, salaryMin, salaryMax, location, skills } = req.body;
 
         jobPost.title = title || jobPost.title;
         jobPost.description = description || jobPost.description;
         jobPost.type = type || jobPost.type;
         jobPost.salaryMin = salaryMin || jobPost.salaryMin;
         jobPost.salaryMax = salaryMax || jobPost.salaryMax;
+        jobPost.location = location || jobPost.location;
+        jobPost.skills = skills || jobPost.skills;
         jobPost.updatedAt = Date.now();
 
         await jobPost.save();

@@ -2,6 +2,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import userRoutes from './routes/User.route.js';
 import recruiterRoutes from './routes/Recruiter.route.js';
+import jobseekerRoutes from './routes/Jobseeker.route.js';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { constants } from './utils/constants.js';
@@ -37,6 +38,7 @@ app.use(express.json());
 
 app.use('/api/users', userRoutes);
 app.use('/api/recruiter', recruiterRoutes);
+app.use('/api/jobseeker', jobseekerRoutes);
 
 app.get('/', (req, res) => {
     res.status(200).send('Server is running...');
