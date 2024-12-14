@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'test123';
+const JWT_SECRET = 'test123';
 const JWT_EXPIRES_IN = '24h';
 
 export const verifyToken = (req, res, next) => {
