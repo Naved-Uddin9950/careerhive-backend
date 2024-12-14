@@ -3,13 +3,14 @@ import JobPost from '../models/JobPost.model.js';
 export const createPost = async (req, res) => {
     try {
         const { title, description, type, salaryMin, salaryMax } = req.body;
+        console.log()
         const jobPost = new JobPost({
             title,
             description,
             type,
             salaryMin,
             salaryMax,
-            createdBy: req.user.id,
+            createdBy: req.user.userId,
         });
 
         await jobPost.save();
