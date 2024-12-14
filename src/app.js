@@ -3,11 +3,12 @@ import mongoose from 'mongoose';
 import userRoutes from './routes/User.route.js';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import { constants } from './utils/constants.js';
 
 dotenv.config();
 const app = express();
-const PORT = process.env.PORT || 3001;
-const DB_CONNECTION_STRING = process.env.DB_CONNECTION_STRING;
+const PORT = constants.port || 3001;
+const DB_CONNECTION_STRING = constants.connection_string;
 const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [];
 
 // app.use(cors({
@@ -27,8 +28,7 @@ app.use(cors({
 }));
 
 mongoose
-    .connect("mongodb+srv://shinigami:naveduddin2003@cluster1.qqdn7pi.mongodb.net/careerhive?retryWrites=true&w=majority&appName=Cluster1")
-    // .connect(DB_CONNECTION_STRING)
+    .connect(DB_CONNECTION_STRING)
     .then(() => console.log('Database connected.'))
     .catch((err) => console.log('Error connecting to Database:', err));
 
