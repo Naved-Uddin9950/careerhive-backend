@@ -51,10 +51,6 @@ const jobPostSchema = new mongoose.Schema({
         ref: 'User',
         required: true,
     },
-    applications : {
-        type: Number,
-        default: 30
-    },
     createdAt: {
         type: Date,
         default: Date.now,

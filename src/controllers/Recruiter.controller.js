@@ -1,3 +1,4 @@
+import JobApplication from '../models/JobApplication.model.js';
 import JobPost from '../models/JobPost.model.js';
 
 export const createPost = async (req, res) => {
@@ -24,7 +25,20 @@ export const createPost = async (req, res) => {
 export const listPosts = async (req, res) => {
     try {
         const jobPosts = await JobPost.find({ createdBy: req.user.userId });
-        res.status(200).json({ success: true, data: jobPosts });
+        const jobPostsWithApplications = await Promise.all(
+            jobPosts.map(async (jobPost) => {
+                const applicationCount = await JobApplication.countDocuments({
+                    jobPost: jobPost._id,
+                });
+
+                return {
+                    ...jobPost.toObject(),
+                    applications: applicationCount,
+                };
+            })
+        );
+
+        res.status(200).json({ success: true, data: jobPostsWithApplications });
     } catch (error) {
         res.status(400).json({ success: false, message: error.message });
     }
@@ -38,7 +52,27 @@ export const getPost = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Job post not found' });
         }
 
-        res.status(200).json({ success: true, data: jobPost });
+        const applications = await JobApplication.find({ jobPost: jobPost._id })
+            .populate('jobSeeker', 'email')
+            .select('status resume appliedAt')
+            .populate('jobPost', 'title');
+
+        const formattedApplications = applications.map(application => ({
+            _id: application.jobSeeker._id,
+            email: application.jobSeeker.email,
+            status: application.status,
+            appliedAt: application.appliedAt,
+            resume: application.resume
+        }));
+
+
+        res.status(200).json({
+            success: true,
+            data: {
+                jobPost,
+                applications: formattedApplications,
+            },
+        });
     } catch (error) {
         res.status(400).json({ success: false, message: error.message });
     }
