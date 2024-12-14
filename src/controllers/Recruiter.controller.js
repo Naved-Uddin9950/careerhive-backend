@@ -128,3 +128,37 @@ export const deletePost = async (req, res) => {
         res.status(400).json({ success: false, message: error.message });
     }
 };
+
+export const listApplications = async (req, res) => {
+    try {
+        const jobPosts = await JobPost.find({ createdBy: req.user.userId });
+
+        if (!jobPosts.length) {
+            return res.status(404).json({ success: false, message: 'No job posts found' });
+        }
+
+        const jobApplications = await JobApplication.find({
+            jobPost: { $in: jobPosts.map(post => post._id) }
+        })
+            .populate('jobSeeker', 'fullname')
+            .populate('jobPost', 'title')
+            .select('jobPost jobSeeker status appliedAt _id');
+
+        const applicationDetails = jobApplications.map(app => ({
+            applicationId: app._id,
+            jobId: app.jobPost._id,
+            jobTitle: app.jobPost.title,
+            applicantName: app.jobSeeker.fullname,
+            dateApplied: app.appliedAt,
+            applicationStatus: app.status,
+        }));
+
+        res.status(200).json({
+            success: true,
+            data: applicationDetails,
+        });
+    } catch (error) {
+        console.error('Error fetching job applications:', error);
+        res.status(500).json({ success: false, message: 'Error fetching job applications' });
+    }
+};
