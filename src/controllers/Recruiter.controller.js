@@ -54,11 +54,13 @@ export const getPost = async (req, res) => {
 
         const applications = await JobApplication.find({ jobPost: jobPost._id })
             .populate('jobSeeker', 'email')
+            .populate('jobSeeker', 'fullname')
             .select('status resume appliedAt')
             .populate('jobPost', 'title');
 
         const formattedApplications = applications.map(application => ({
             _id: application.jobSeeker._id,
+            fullname: application.jobSeeker.fullname,
             email: application.jobSeeker.email,
             status: application.status,
             appliedAt: application.appliedAt,
