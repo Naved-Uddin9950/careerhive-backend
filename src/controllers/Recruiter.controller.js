@@ -53,8 +53,7 @@ export const getPost = async (req, res) => {
         }
 
         const applications = await JobApplication.find({ jobPost: jobPost._id })
-            .populate('jobSeeker', 'email')
-            .populate('jobSeeker', 'fullname')
+            .populate('jobSeeker', 'email fullname')
             .select('status resume appliedAt')
             .populate('jobPost', 'title');
 
